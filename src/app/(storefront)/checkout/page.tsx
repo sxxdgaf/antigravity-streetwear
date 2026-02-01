@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/Input';
 import { useCartStore } from '@/store/cart';
 import { useIsMounted } from '@/hooks/useStore';
 import { formatPrice } from '@/lib/formatting';
-import { loadStripe } from '@stripe/stripe-js';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -26,9 +25,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-
-// Initialize Stripe
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 // Mock saved addresses - would come from user profile
 const savedAddresses = [
@@ -192,14 +188,10 @@ export default function CheckoutPage() {
         }
 
         // Redirect to Stripe checkout
-        const stripe = await stripePromise;
-        if (stripe && data.sessionId) {
-          const { error } = await stripe.redirectToCheckout({
-            sessionId: data.sessionId,
-          });
-          if (error) {
-            throw new Error(error.message);
-          }
+        if (data.sessionUrl) {
+          window.location.href = data.sessionUrl;
+        } else {
+          throw new Error('No checkout URL provided');
         }
       }
     } catch (err) {
