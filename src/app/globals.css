@@ -1,0 +1,290 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   ANTIGRAVITY - Global Styles
+   Premium Streetwear E-commerce
+   ============================================ */
+
+@layer base {
+  /* CSS Variables for theme */
+  :root {
+    --color-brand-black: #0a0a0a;
+    --color-brand-white: #fafafa;
+    --color-brand-accent: #c9a962;
+    
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+  }
+
+  /* Dark mode support */
+  .dark {
+    --color-brand-black: #fafafa;
+    --color-brand-white: #0a0a0a;
+  }
+
+  /* Base body styles */
+  body {
+    @apply bg-brand-white text-brand-black antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Selection color */
+  ::selection {
+    @apply bg-brand-black text-brand-white;
+  }
+
+  /* Focus styles for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-brand-black ring-offset-2 ring-offset-brand-white;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-brand-grey-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-brand-grey-400 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-brand-grey-500;
+  }
+
+  /* Remove default button styles */
+  button {
+    @apply cursor-pointer;
+  }
+
+  /* Improved link defaults */
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  /* Heading defaults */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer components {
+  /* Container */
+  .container-custom {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Glassmorphism card */
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-glass;
+  }
+
+  .glass-card-dark {
+    @apply bg-black/80 backdrop-blur-lg border border-white/10 shadow-glass-dark;
+  }
+
+  /* Button variants */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-none px-6 py-3 
+           text-sm font-medium uppercase tracking-wider transition-all duration-300
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-black text-brand-white 
+           hover:bg-brand-grey-800 active:bg-brand-grey-900;
+  }
+
+  .btn-secondary {
+    @apply btn bg-transparent text-brand-black border-2 border-brand-black
+           hover:bg-brand-black hover:text-brand-white;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-brand-black
+           hover:bg-brand-grey-100;
+  }
+
+  .btn-accent {
+    @apply btn bg-brand-accent text-brand-black
+           hover:bg-brand-accent/90;
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full px-4 py-3 bg-transparent border border-brand-grey-300
+           text-brand-black placeholder:text-brand-grey-400
+           focus:border-brand-black focus:outline-none
+           transition-colors duration-200;
+  }
+
+  .input-dark {
+    @apply input border-brand-grey-600 text-brand-white
+           placeholder:text-brand-grey-500 focus:border-brand-white;
+  }
+
+  /* Label styles */
+  .label {
+    @apply block text-sm font-medium text-brand-grey-700 mb-2;
+  }
+
+  /* Product card */
+  .product-card {
+    @apply group relative overflow-hidden;
+  }
+
+  .product-card-image {
+    @apply aspect-product w-full object-cover bg-brand-grey-100
+           transition-transform duration-700 ease-out
+           group-hover:scale-105;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-2 py-1 text-xs font-medium uppercase tracking-wider;
+  }
+
+  .badge-new {
+    @apply badge bg-brand-black text-brand-white;
+  }
+
+  .badge-sale {
+    @apply badge bg-red-600 text-white;
+  }
+
+  .badge-soldout {
+    @apply badge bg-brand-grey-400 text-white;
+  }
+
+  /* Animated underline link */
+  .link-underline {
+    @apply relative inline-block;
+  }
+
+  .link-underline::after {
+    @apply content-[''] absolute bottom-0 left-0 w-full h-px bg-current
+           origin-left scale-x-0 transition-transform duration-300;
+  }
+
+  .link-underline:hover::after {
+    @apply scale-x-100;
+  }
+
+  /* Section padding */
+  .section-padding {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+
+  /* Grid layouts */
+  .product-grid {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply animate-pulse bg-brand-grey-200 rounded;
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer::after {
+    @apply content-[''] absolute inset-0
+           bg-gradient-to-r from-transparent via-white/20 to-transparent
+           animate-shimmer;
+    background-size: 200% 100%;
+  }
+}
+
+@layer utilities {
+  /* Text balance for headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Aspect ratios */
+  .aspect-product {
+    aspect-ratio: 3 / 4;
+  }
+
+  .aspect-hero {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Gradient overlays */
+  .gradient-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent;
+  }
+
+  /* Animation delays */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  /* Custom easing */
+  .ease-smooth {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Backdrop blur variants */
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* ============================================
+   Lenis Smooth Scroll
+   ============================================ */
+
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
