@@ -27,7 +27,7 @@ async function getProduct(slug: string): Promise<ProductWithVariants | null> {
     .eq('is_active', true)
     .single();
 
-  return product;
+  return product as ProductWithVariants | null;
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
