@@ -4,13 +4,14 @@ import { Container } from '@/components/ui/Container';
 import { ProductCard } from '@/components/ui/ProductCard';
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import type { Category } from '@/types/database';
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ sort?: string; page?: string }>;
 }
 
-async function getCategory(slug: string) {
+async function getCategory(slug: string): Promise<Category | null> {
   const supabase = await createClient();
 
   const { data } = await supabase
