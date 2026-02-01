@@ -1,12 +1,12 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import Link from 'next/link';
 import { forgotPassword, type AuthState } from '@/app/actions/auth';
 import { Loader2, ArrowLeft, Mail } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
-  const [state, formAction, isPending] = useActionState<AuthState | null, FormData>(
+  const [state, formAction] = useFormState<AuthState | null, FormData>(
     forgotPassword,
     null
   );
@@ -78,21 +78,28 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Submit button */}
-        <button
-          type="submit"
-          disabled={isPending}
-          className="btn-primary w-full"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Sending...
-            </>
-          ) : (
-            'Send Reset Link'
-          )}
-        </button>
+        <SubmitButton />
       </form>
     </div>
+  );
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="btn-primary w-full"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="w-5 h-5 animate-spin" />
+          Sending...
+        </>
+      ) : (
+        'Send Reset Link'
+      )}
+    </button>
   );
 }

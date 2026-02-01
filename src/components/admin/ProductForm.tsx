@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageUpload } from './ImageUpload';
@@ -29,7 +29,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     ? updateProduct.bind(null, product.id)
     : createProduct;
 
-  const [state, formAction, isPending] = useActionState<ProductActionState | null, FormData>(
+  const [state, formAction] = useFormState<ProductActionState | null, FormData>(
     boundAction,
     null
   );
@@ -293,22 +293,29 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           </div>
 
           {/* Submit */}
-          <button
-            type="submit"
-            disabled={isPending}
-            className="btn-primary w-full"
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                {isEditing ? 'Updating...' : 'Creating...'}
-              </>
-            ) : (
-              isEditing ? 'Update Product' : 'Create Product'
-            )}
-          </button>
+          <SubmitButton isEditing={isEditing} />
         </div>
       </div>
     </form>
+  );
+}
+
+function SubmitButton({ isEditing }: { isEditing: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="btn-primary w-full"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="w-5 h-5 animate-spin" />
+          {isEditing ? 'Updating...' : 'Creating...'}
+        </>
+      ) : (
+        isEditing ? 'Update Product' : 'Create Product'
+      )}
+    </button>
   );
 }
