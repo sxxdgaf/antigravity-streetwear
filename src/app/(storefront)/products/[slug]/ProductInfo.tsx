@@ -36,7 +36,7 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
   const stockCount = selectedVariant?.stock_quantity || 0;
 
   // Calculate price with modifier
-  const finalPrice = product.price + (selectedVariant?.price_modifier || 0);
+  const finalPrice = product.price + (selectedVariant?.price_adjustment || 0);
 
   const isOnSale = product.compare_at_price && product.compare_at_price > product.price;
   const discountPercent = isOnSale
