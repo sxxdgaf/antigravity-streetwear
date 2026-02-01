@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Product, ProductVariant } from '@/types';
+import { ProductWithCategory, ProductVariant } from '@/types';
 import { formatPrice } from '@/lib/formatting';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductInfoProps {
-  product: Product;
+  product: ProductWithCategory;
   variants: ProductVariant[];
 }
 
