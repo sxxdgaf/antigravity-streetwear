@@ -4,7 +4,7 @@ import { Container } from '@/components/ui/Container';
 import { ProductCard } from '@/components/ui/ProductCard';
 import Image from 'next/image';
 import type { Metadata } from 'next';
-import type { Category } from '@/types/database';
+import type { Category, Product } from '@/types/database';
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -24,7 +24,11 @@ async function getCategory(slug: string): Promise<Category | null> {
   return data;
 }
 
-async function getCategoryProducts(categoryId: string, sort?: string, page = 1) {
+async function getCategoryProducts(
+  categoryId: string,
+  sort?: string,
+  page = 1
+): Promise<{ products: Product[]; total: number; itemsPerPage: number }> {
   const supabase = await createClient();
   const itemsPerPage = 12;
   const offset = (page - 1) * itemsPerPage;
