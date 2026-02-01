@@ -7,12 +7,13 @@ import { RelatedProducts } from './RelatedProducts';
 import { Suspense } from 'react';
 import { ProductGridSkeleton } from '@/components/ui/Skeleton';
 import type { Metadata } from 'next';
+import type { ProductWithVariants } from '@/types';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getProduct(slug: string) {
+async function getProduct(slug: string): Promise<ProductWithVariants | null> {
   const supabase = await createClient();
 
   const { data: product } = await supabase
