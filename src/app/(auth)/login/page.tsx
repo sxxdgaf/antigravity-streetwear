@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn, type AuthState } from '@/app/actions/auth';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
 
 function SubmitButton({ isPending }: { isPending: boolean }) {
   return (
@@ -26,7 +28,7 @@ function SubmitButton({ isPending }: { isPending: boolean }) {
   );
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/';
   const [showPassword, setShowPassword] = useState(false);
@@ -125,5 +127,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="text-brand-white">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

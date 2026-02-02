@@ -8,6 +8,7 @@ import { Suspense } from 'react';
 import { ProductGridSkeleton } from '@/components/ui/Skeleton';
 import type { Metadata } from 'next';
 import type { ProductWithVariants } from '@/types';
+import { parseJsonImages } from '@/types';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -40,13 +41,14 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
   }
 
+  const productImages = parseJsonImages(product.images);
   return {
     title: product.name,
     description: product.description || `Shop ${product.name} at ANTIGRAVITY`,
     openGraph: {
       title: product.name,
       description: product.description || `Shop ${product.name} at ANTIGRAVITY`,
-      images: product.images?.[0] ? [{ url: product.images[0] }] : [],
+      images: productImages[0] ? [{ url: productImages[0] }] : [],
     },
   };
 }
@@ -94,7 +96,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="grid lg:grid-cols-2 gap-12 mb-20">
           {/* Image Gallery */}
           <div>
-            <ImageGallery images={product.images || []} productName={product.name} />
+            <ImageGallery images={parseJsonImages(product.images)} productName={product.name} />
           </div>
 
           {/* Product Info */}
@@ -104,33 +106,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
 
         {/* Product Details */}
-        {(product.description || product.details) && (
+        {product.description && (
           <div className="mb-20">
             <h2 className="text-2xl font-display font-bold text-brand-black mb-6">
               Product Details
             </h2>
             <div className="grid md:grid-cols-2 gap-8">
-              {product.description && (
-                <div>
-                  <h3 className="font-semibold text-brand-black mb-3">Description</h3>
-                  <p className="text-brand-grey-600 leading-relaxed">
-                    {product.description}
-                  </p>
-                </div>
-              )}
-              {product.details && (
-                <div>
-                  <h3 className="font-semibold text-brand-black mb-3">Details & Care</h3>
-                  <ul className="space-y-2 text-brand-grey-600">
-                    {(product.details as string[]).map((detail, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-brand-accent rounded-full mt-2 flex-shrink-0" />
-                        {detail}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <div>
+                <h3 className="font-semibold text-brand-black mb-3">Description</h3>
+                <p className="text-brand-grey-600 leading-relaxed">
+                  {product.description}
+                </p>
+              </div>
             </div>
           </div>
         )}

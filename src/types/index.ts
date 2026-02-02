@@ -47,3 +47,29 @@ export interface ProductSort {
   field: 'price' | 'created_at' | 'sales_count' | 'name';
   direction: 'asc' | 'desc';
 }
+
+/**
+ * Helper type to safely cast Json type to string array
+ */
+export function parseJsonImages(images: unknown): string[] {
+  if (!images) return [];
+  if (Array.isArray(images)) {
+    return images.filter((item): item is string => typeof item === 'string');
+  }
+  return [];
+}
+
+/**
+ * Helper to safely parse Json to expected type
+ */
+export function parseJson<T>(json: unknown, fallback: T): T {
+  if (!json) return fallback;
+  try {
+    if (typeof json === 'string') {
+      return JSON.parse(json) as T;
+    }
+    return json as T;
+  } catch {
+    return fallback;
+  }
+}

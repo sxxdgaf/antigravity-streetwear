@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { ProductCard } from '@/components/ui/ProductCard';
+import type { ProductWithCategory } from '@/types';
 
 interface RelatedProductsProps {
   productId: string;
@@ -24,10 +25,10 @@ export async function RelatedProducts({ productId, categoryId }: RelatedProducts
     query = query.eq('category_id', categoryId);
   }
 
-  const { data: products } = await query;
+  const { data: products } = await query.returns<ProductWithCategory[]>();
 
   // If not enough products in same category, fetch more
-  let relatedProducts = products || [];
+  let relatedProducts: ProductWithCategory[] = products || [];
   
   if (relatedProducts.length < 4 && categoryId) {
     const { data: moreProducts } = await supabase
@@ -39,7 +40,8 @@ export async function RelatedProducts({ productId, categoryId }: RelatedProducts
       .eq('is_active', true)
       .neq('id', productId)
       .neq('category_id', categoryId)
-      .limit(4 - relatedProducts.length);
+      .limit(4 - relatedProducts.length)
+      .returns<ProductWithCategory[]>();
 
     relatedProducts = [...relatedProducts, ...(moreProducts || [])];
   }

@@ -3,6 +3,7 @@
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { isAdmin } from './auth';
 import { revalidatePath } from 'next/cache';
+import type { UpdateTables, Order } from '@/types';
 
 export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
 
@@ -19,7 +20,7 @@ export async function updateOrderStatus(formData: FormData) {
   try {
     const supabase = await createAdminClient();
 
-    const updateData: any = {
+    const updateData: UpdateTables<'orders'> = {
       status,
       updated_at: new Date().toISOString(),
     };
@@ -31,8 +32,8 @@ export async function updateOrderStatus(formData: FormData) {
       updateData.delivered_at = new Date().toISOString();
     }
 
-    const { error } = await (supabase
-      .from('orders') as any)
+    const { error } = await supabase
+      .from('orders')
       .update(updateData)
       .eq('id', orderId);
 
@@ -57,13 +58,12 @@ export async function updateTrackingInfo(formData: FormData) {
   const trackingUrl = formData.get('tracking_url') as string;
 
   try {
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
-    const { error } = await (supabase
-      .from('orders') as any)
+    const { error } = await supabase
+      .from('orders')
       .update({
         tracking_number: trackingNumber,
-        tracking_url: trackingUrl,
         updated_at: new Date().toISOString(),
       })
       .eq('id', orderId);
@@ -82,7 +82,8 @@ export async function getOrdersStats() {
 
   const { data: orders } = await supabase
     .from('orders')
-    .select('status, total_amount');
+    .select('status, total')
+    .returns<Pick<Order, 'status' | 'total'>[]>();
 
   if (!orders) return null;
 
@@ -95,7 +96,7 @@ export async function getOrdersStats() {
     cancelled: orders.filter((o) => ['cancelled', 'refunded'].includes(o.status)).length,
     revenue: orders
       .filter((o) => !['cancelled', 'refunded'].includes(o.status))
-      .reduce((sum, o) => sum + o.total_amount, 0),
+      .reduce((sum, o) => sum + o.total, 0),
   };
 
   return stats;

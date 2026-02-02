@@ -661,6 +661,16 @@ export type ProductWithVariants = Product & {
   category: Category | null;
 };
 
+export type OrderItemWithDetails = OrderItem & {
+  product: Product | null;
+  variant: ProductVariant | null;
+};
+
+export type OrderWithDetails = Order & {
+  user: User | null;
+  order_items: OrderItemWithDetails[];
+};
+
 export type OrderWithItems = Order & {
   items: OrderItem[];
 };

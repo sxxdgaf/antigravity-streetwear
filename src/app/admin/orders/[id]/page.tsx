@@ -6,6 +6,8 @@ import { formatCurrency, formatDate } from '@/lib/formatting';
 import { cn } from '@/lib/utils';
 import { OrderStatusUpdater } from './OrderStatusUpdater';
 import { TrackingInfo } from './TrackingInfo';
+import type { OrderWithDetails } from '@/types';
+import { parseJsonImages } from '@/types';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-async function getOrder(id: string) {
+async function getOrder(id: string): Promise<OrderWithDetails | null> {
   const supabase = await createClient();
 
   const { data: order } = await supabase
@@ -36,7 +38,8 @@ async function getOrder(id: string) {
       )
     `)
     .eq('id', id)
-    .single();
+    .single()
+    .returns<OrderWithDetails>();
 
   return order;
 }
@@ -148,48 +151,51 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </h2>
             </div>
             <div className="divide-y divide-brand-grey-100">
-              {(order as any).order_items?.map((item: any) => (
-                <div key={item.id} className="p-4 flex gap-4">
-                  <div className="w-20 h-20 bg-brand-grey-100 rounded-lg overflow-hidden flex-shrink-0">
-                    {item.product?.images?.[0] ? (
-                      <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-brand-grey-400">
-                        <Package className="w-8 h-8" />
+              {order.order_items?.map((item) => {
+                const productImages = item.product ? parseJsonImages(item.product.images) : [];
+                return (
+                  <div key={item.id} className="p-4 flex gap-4">
+                    <div className="w-20 h-20 bg-brand-grey-100 rounded-lg overflow-hidden flex-shrink-0">
+                      {productImages[0] ? (
+                        <img
+                          src={productImages[0]}
+                          alt={item.product?.name || 'Product'}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-brand-grey-400">
+                          <Package className="w-8 h-8" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <Link
+                        href={`/admin/products/${item.product?.slug}`}
+                        className="font-medium text-brand-black hover:underline"
+                      >
+                        {item.product?.name || 'Product'}
+                      </Link>
+                      <div className="mt-1 text-sm text-brand-grey-500">
+                        {item.variant?.size && <span>Size: {item.variant.size}</span>}
+                        {item.variant?.size && item.variant?.color && <span> / </span>}
+                        {item.variant?.color && <span>Color: {item.variant.color}</span>}
                       </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <Link
-                      href={`/admin/products/${item.product?.slug}`}
-                      className="font-medium text-brand-black hover:underline"
-                    >
-                      {item.product?.name || 'Product'}
-                    </Link>
-                    <div className="mt-1 text-sm text-brand-grey-500">
-                      {item.variant?.size && <span>Size: {item.variant.size}</span>}
-                      {item.variant?.size && item.variant?.color && <span> / </span>}
-                      {item.variant?.color && <span>Color: {item.variant.color}</span>}
+                      <div className="mt-1 text-xs text-brand-grey-400 font-mono">
+                        SKU: {item.variant?.sku}
+                      </div>
                     </div>
-                    <div className="mt-1 text-xs text-brand-grey-400 font-mono">
-                      SKU: {item.variant?.sku}
+                    <div className="text-right">
+                      <p className="font-medium text-brand-black">
+                        {formatCurrency(item.unit_price)}
+                      </p>
+                      <p className="text-sm text-brand-grey-500">Qty: {item.quantity}</p>
+                      <p className="text-sm font-medium text-brand-grey-700">
+                        {formatCurrency(item.total_price)}
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium text-brand-black">
-                      {formatCurrency(item.unit_price)}
-                    </p>
-                    <p className="text-sm text-brand-grey-500">Qty: {item.quantity}</p>
-                    <p className="text-sm font-medium text-brand-grey-700">
-                      {formatCurrency(item.total_price)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             {/* Order Summary */}
             <div className="p-4 bg-brand-grey-50 border-t border-brand-grey-200">
@@ -200,7 +206,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-brand-grey-500">Shipping</span>
-                  <span className="text-brand-grey-700">{formatCurrency(order.shipping_amount)}</span>
+                  <span className="text-brand-grey-700">{formatCurrency(order.shipping_cost)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-brand-grey-500">Tax</span>
@@ -214,7 +220,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 )}
                 <div className="flex justify-between pt-2 border-t border-brand-grey-200">
                   <span className="font-medium text-brand-black">Total</span>
-                  <span className="font-bold text-brand-black">{formatCurrency(order.total_amount)}</span>
+                  <span className="font-bold text-brand-black">{formatCurrency(order.total)}</span>
                 </div>
               </div>
             </div>
@@ -224,7 +230,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <TrackingInfo
             orderId={order.id}
             trackingNumber={order.tracking_number}
-            trackingUrl={order.tracking_url}
+            carrier={order.carrier}
           />
         </div>
 
@@ -237,14 +243,14 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             </div>
             <div className="p-4">
               <p className="font-medium text-brand-black">
-                {(order as any).user?.full_name || order.shipping_address?.name || 'Guest'}
+                {order.user?.full_name || order.customer_name || 'Guest'}
               </p>
               <p className="text-sm text-brand-grey-500">
-                {(order as any).user?.email || order.shipping_address?.email}
+                {order.user?.email || order.customer_email}
               </p>
-              {(order as any).user?.id && (
+              {order.user?.id && (
                 <Link
-                  href={`/admin/customers/${(order as any).user.id}`}
+                  href={`/admin/customers/${order.user.id}`}
                   className="text-sm text-brand-accent hover:underline mt-2 inline-block"
                 >
                   View customer profile
@@ -262,24 +268,18 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </h2>
             </div>
             <div className="p-4 text-sm text-brand-grey-700">
-              {order.shipping_address ? (
-                <>
-                  <p className="font-medium">{order.shipping_address.name}</p>
-                  <p>{order.shipping_address.address_line1}</p>
-                  {order.shipping_address.address_line2 && (
-                    <p>{order.shipping_address.address_line2}</p>
-                  )}
-                  <p>
-                    {order.shipping_address.city}, {order.shipping_address.state}{' '}
-                    {order.shipping_address.postal_code}
-                  </p>
-                  <p>{order.shipping_address.country}</p>
-                  {order.shipping_address.phone && (
-                    <p className="mt-2">{order.shipping_address.phone}</p>
-                  )}
-                </>
-              ) : (
-                <p className="text-brand-grey-500">No shipping address provided</p>
+              <p className="font-medium">{order.customer_name}</p>
+              <p>{order.shipping_address_line1}</p>
+              {order.shipping_address_line2 && (
+                <p>{order.shipping_address_line2}</p>
+              )}
+              <p>
+                {order.shipping_city}{order.shipping_state ? `, ${order.shipping_state}` : ''}{' '}
+                {order.shipping_postal_code || ''}
+              </p>
+              <p>{order.shipping_country}</p>
+              {order.customer_phone && (
+                <p className="mt-2">{order.customer_phone}</p>
               )}
             </div>
           </div>
@@ -312,14 +312,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-brand-grey-500">Method</span>
                   <span className="text-sm text-brand-grey-700 capitalize">
-                    {order.payment_method}
-                  </span>
-                </div>
-              )}
-              {order.stripe_payment_intent_id && (
-                <div className="mt-2 pt-2 border-t border-brand-grey-100">
-                  <span className="text-xs text-brand-grey-400 font-mono">
-                    {order.stripe_payment_intent_id}
+                    {order.payment_method.replace('_', ' ')}
                   </span>
                 </div>
               )}

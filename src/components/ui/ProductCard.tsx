@@ -5,12 +5,12 @@ import Image from 'next/image';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/formatting';
-import { Product } from '@/types';
+import { Product, ProductWithCategory, parseJsonImages } from '@/types';
 import { motion } from 'framer-motion';
 import { Badge } from './Badge';
 
 interface ProductCardProps {
-  product: Product;
+  product: Product | ProductWithCategory;
   index?: number;
 }
 
@@ -19,6 +19,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const discountPercent = isOnSale
     ? Math.round((1 - product.price / product.compare_at_price!) * 100)
     : 0;
+
+  // Safely parse images from Json type
+  const images = parseJsonImages(product.images);
+  const category = 'category' in product ? product.category : null;
 
   return (
     <motion.div
@@ -29,18 +33,18 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       <Link href={`/products/${product.slug}`} className="group block">
         {/* Image Container */}
         <div className="relative aspect-[3/4] bg-brand-grey-100 rounded-lg overflow-hidden mb-4">
-          {product.images?.[0] ? (
+          {images[0] ? (
             <>
               <Image
-                src={product.images[0]}
+                src={images[0]}
                 alt={product.name}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               {/* Second image on hover */}
-              {product.images[1] && (
+              {images[1] && (
                 <Image
-                  src={product.images[1]}
+                  src={images[1]}
                   alt={product.name}
                   fill
                   className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -91,7 +95,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* Product Info */}
         <div className="space-y-1">
           <p className="text-xs text-brand-grey-500 uppercase tracking-wider">
-            {product.category?.name || 'Uncategorized'}
+            {category?.name || 'Uncategorized'}
           </p>
           <h3 className="font-medium text-brand-black group-hover:text-brand-grey-600 transition-colors line-clamp-1">
             {product.name}

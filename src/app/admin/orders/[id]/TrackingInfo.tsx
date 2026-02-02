@@ -7,22 +7,20 @@ import { Truck, Edit2, Save, X, Loader2, ExternalLink } from 'lucide-react';
 interface TrackingInfoProps {
   orderId: string;
   trackingNumber?: string | null;
-  trackingUrl?: string | null;
+  carrier?: string | null;
 }
 
-export function TrackingInfo({ orderId, trackingNumber, trackingUrl }: TrackingInfoProps) {
+export function TrackingInfo({ orderId, trackingNumber, carrier }: TrackingInfoProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [formData, setFormData] = useState({
     tracking_number: trackingNumber || '',
-    tracking_url: trackingUrl || '',
   });
 
   const handleSave = () => {
     const form = new FormData();
     form.append('orderId', orderId);
     form.append('tracking_number', formData.tracking_number);
-    form.append('tracking_url', formData.tracking_url);
 
     startTransition(async () => {
       const result = await updateTrackingInfo(form);
@@ -37,7 +35,6 @@ export function TrackingInfo({ orderId, trackingNumber, trackingUrl }: TrackingI
   const handleCancel = () => {
     setFormData({
       tracking_number: trackingNumber || '',
-      tracking_url: trackingUrl || '',
     });
     setIsEditing(false);
   };
@@ -75,18 +72,6 @@ export function TrackingInfo({ orderId, trackingNumber, trackingUrl }: TrackingI
                 className="w-full px-3 py-2 border border-brand-grey-200 rounded-lg focus:ring-2 focus:ring-brand-black focus:border-transparent font-mono text-sm"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-grey-700 mb-1">
-                Tracking URL
-              </label>
-              <input
-                type="url"
-                value={formData.tracking_url}
-                onChange={(e) => setFormData({ ...formData, tracking_url: e.target.value })}
-                placeholder="https://www.ups.com/track?tracknum=..."
-                className="w-full px-3 py-2 border border-brand-grey-200 rounded-lg focus:ring-2 focus:ring-brand-black focus:border-transparent text-sm"
-              />
-            </div>
             <div className="flex justify-end gap-2">
               <button
                 type="button"
@@ -119,16 +104,11 @@ export function TrackingInfo({ orderId, trackingNumber, trackingUrl }: TrackingI
                   <span className="text-sm text-brand-grey-500 block">Tracking Number</span>
                   <span className="font-mono text-brand-black">{trackingNumber}</span>
                 </div>
-                {trackingUrl && (
-                  <a
-                    href={trackingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-brand-accent hover:underline"
-                  >
-                    Track Package
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                {carrier && (
+                  <div>
+                    <span className="text-sm text-brand-grey-500 block">Carrier</span>
+                    <span className="text-brand-black">{carrier}</span>
+                  </div>
                 )}
               </div>
             ) : (

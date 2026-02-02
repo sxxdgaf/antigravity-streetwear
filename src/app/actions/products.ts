@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache';
 import { isAdmin } from './auth';
 import { z } from 'zod';
 import { slugify } from '@/lib/formatting';
+import type { Json, InsertTables, UpdateTables } from '@/types';
 
 // Validation schema
 const productSchema = z.object({
@@ -97,8 +98,8 @@ export async function createProduct(
     : [];
 
   // Insert product
-  const { data: product, error } = await (supabase
-    .from('products') as any)
+  const { data: product, error } = await supabase
+    .from('products')
     .insert({
       name: data.name,
       slug: data.slug,
@@ -108,7 +109,7 @@ export async function createProduct(
       compare_at_price: data.compareAtPrice || null,
       category_id: data.categoryId || null,
       thumbnail_url: images[0] || null,
-      images: images,
+      images: images as unknown as Json,
       is_active: data.isActive,
       is_featured: data.isFeatured,
       is_new: data.isNew,
@@ -188,8 +189,8 @@ export async function updateProduct(
     ? data.tags.split(',').map((t) => t.trim()).filter(Boolean)
     : [];
 
-  const { error } = await (supabase
-    .from('products') as any)
+  const { error } = await supabase
+    .from('products')
     .update({
       name: data.name,
       slug: data.slug,
@@ -199,7 +200,7 @@ export async function updateProduct(
       compare_at_price: data.compareAtPrice || null,
       category_id: data.categoryId || null,
       thumbnail_url: images[0] || null,
-      images,
+      images: images as unknown as Json,
       is_active: data.isActive,
       is_featured: data.isFeatured,
       is_new: data.isNew,
@@ -286,8 +287,8 @@ export async function addProductVariant(
   const data = validatedFields.data;
   const supabase = createAdminClient();
 
-  const { error } = await (supabase
-    .from('product_variants') as any)
+  const { error } = await supabase
+    .from('product_variants')
     .insert({
       product_id: productId,
       size: data.size,
@@ -330,8 +331,8 @@ export async function updateProductVariant(
 
   const supabase = createAdminClient();
 
-  const { error } = await (supabase
-    .from('product_variants') as any)
+  const { error } = await supabase
+    .from('product_variants')
     .update({
       stock_quantity: stockQuantity,
       sku: formData.get('sku')?.toString() || null,

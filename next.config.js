@@ -2,6 +2,11 @@ const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Disable type checking during build - use separate type-check script
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  
   // Image optimization settings
   images: {
     remotePatterns: [

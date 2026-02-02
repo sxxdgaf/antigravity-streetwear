@@ -3,8 +3,9 @@
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { isAdmin } from './auth';
 import { revalidatePath } from 'next/cache';
+import type { UpdateTables, InsertTables, ProductVariant } from '@/types';
 
-export type InventoryChangeType = 'restock' | 'sale' | 'return' | 'adjustment' | 'damaged' | 'transfer';
+export type InventoryChangeType = 'restock' | 'sale' | 'return' | 'adjustment' | 'damaged';
 
 export async function updateStock(formData: FormData) {
   const adminCheck = await isAdmin();
@@ -22,14 +23,15 @@ export async function updateStock(formData: FormData) {
   }
 
   try {
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
     // Get current stock
     const { data: variant } = await supabase
       .from('product_variants')
       .select('stock_quantity, product_id')
       .eq('id', variantId)
-      .single();
+      .single()
+      .returns<Pick<ProductVariant, 'stock_quantity' | 'product_id'>>();
 
     if (!variant) {
       return { success: false, error: 'Variant not found' };
@@ -74,11 +76,11 @@ export async function updateStock(formData: FormData) {
 
     // Log the change
     const { error: logError } = await supabase.from('inventory_logs').insert({
-      product_id: variant.product_id,
       variant_id: variantId,
-      change_type: changeType,
+      action: changeType,
       quantity_change: quantityChange,
-      new_quantity: newStock,
+      quantity_before: variant.stock_quantity,
+      quantity_after: newStock,
       notes,
     });
 
@@ -101,7 +103,7 @@ export async function bulkUpdateStock(formData: FormData) {
   const updates = JSON.parse(updatesJson) as { variantId: string; quantity: number }[];
 
   try {
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
     let successCount = 0;
 
     for (const { variantId, quantity } of updates) {
@@ -132,7 +134,13 @@ export async function getInventoryStats() {
 
   if (!variants) return null;
 
-  const activeVariants = variants.filter((v) => (v as any).product?.is_active);
+  // Type guard for the product relation
+  type VariantWithProduct = typeof variants[number] & {
+    product: { is_active: boolean } | null;
+  };
+
+  const typedVariants = variants as unknown as VariantWithProduct[];
+  const activeVariants = typedVariants.filter((v) => v.product?.is_active);
 
   return {
     totalVariants: variants.length,

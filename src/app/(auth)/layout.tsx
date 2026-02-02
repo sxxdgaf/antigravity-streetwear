@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Auth Layout
  * Minimal layout for authentication pages

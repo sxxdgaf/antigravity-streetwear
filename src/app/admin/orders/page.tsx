@@ -3,12 +3,18 @@ import Link from 'next/link';
 import { Eye, Package, Truck, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatDate } from '@/lib/formatting';
+import type { Order, User } from '@/types';
 
 export const metadata = {
   title: 'Orders | Admin',
 };
 
-async function getOrders(status?: string) {
+type OrderWithUser = Order & {
+  user: Pick<User, 'email' | 'full_name'> | null;
+  order_items: { count: number }[];
+};
+
+async function getOrders(status?: string): Promise<OrderWithUser[]> {
   const supabase = await createClient();
 
   let query = supabase
@@ -24,7 +30,7 @@ async function getOrders(status?: string) {
     query = query.eq('status', status);
   }
 
-  const { data: orders } = await query.limit(100);
+  const { data: orders } = await query.limit(100).returns<OrderWithUser[]>();
 
   return orders || [];
 }
@@ -111,10 +117,10 @@ export default async function OrdersPage({
                       <td className="px-6 py-4">
                         <div>
                           <p className="text-sm font-medium text-brand-black">
-                            {(order as any).user?.full_name || 'Guest'}
+                            {order.user?.full_name || order.customer_name || 'Guest'}
                           </p>
                           <p className="text-xs text-brand-grey-500">
-                            {(order as any).user?.email || order.shipping_address?.email}
+                            {order.user?.email || order.customer_email}
                           </p>
                         </div>
                       </td>
@@ -122,10 +128,10 @@ export default async function OrdersPage({
                         {formatDate(order.created_at)}
                       </td>
                       <td className="px-6 py-4 text-sm text-brand-grey-600">
-                        {(order as any).order_items?.[0]?.count || 0} items
+                        {order.order_items?.[0]?.count || 0} items
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-brand-black">
-                        {formatCurrency(order.total_amount)}
+                        {formatCurrency(order.total)}
                       </td>
                       <td className="px-6 py-4">
                         <span

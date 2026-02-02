@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import type { UpdateTables } from '@/types';
 
 // Validation schemas
 const loginSchema = z.object({
@@ -284,21 +285,19 @@ export async function updateProfile(
     return { error: 'Not authenticated' };
   }
 
-  const updates = {
-    full_name: formData.get('fullName')?.toString() || null,
-    phone: formData.get('phone')?.toString() || null,
-    address_line1: formData.get('addressLine1')?.toString() || null,
-    address_line2: formData.get('addressLine2')?.toString() || null,
-    city: formData.get('city')?.toString() || null,
-    state: formData.get('state')?.toString() || null,
-    postal_code: formData.get('postalCode')?.toString() || null,
-    country: formData.get('country')?.toString() || null,
-    updated_at: new Date().toISOString(),
-  };
-
-  const { error } = await (supabase
-    .from('users') as any)
-    .update(updates)
+  const { error } = await supabase
+    .from('users')
+    .update({
+      full_name: formData.get('fullName')?.toString() || null,
+      phone: formData.get('phone')?.toString() || null,
+      address_line1: formData.get('addressLine1')?.toString() || null,
+      address_line2: formData.get('addressLine2')?.toString() || null,
+      city: formData.get('city')?.toString() || null,
+      state: formData.get('state')?.toString() || null,
+      postal_code: formData.get('postalCode')?.toString() || null,
+      country: formData.get('country')?.toString() || null,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', user.id);
 
   if (error) {

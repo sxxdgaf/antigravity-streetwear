@@ -3,6 +3,7 @@
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { isAdmin } from './auth';
 import { revalidatePath } from 'next/cache';
+import type { InsertTables, UpdateTables } from '@/types';
 
 export async function createCategory(formData: FormData) {
   const adminCheck = await isAdmin();
@@ -18,9 +19,9 @@ export async function createCategory(formData: FormData) {
   const is_active = formData.get('is_active') === 'true';
 
   try {
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
-    const { error } = await (supabase.from('categories') as any).insert({
+    const { error } = await supabase.from('categories').insert({
       name,
       slug,
       description,
@@ -53,10 +54,10 @@ export async function updateCategory(formData: FormData) {
   const is_active = formData.get('is_active') === 'true';
 
   try {
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
-    const { error } = await (supabase
-      .from('categories') as any)
+    const { error } = await supabase
+      .from('categories')
       .update({
         name,
         slug,
@@ -123,8 +124,8 @@ export async function reorderCategories(formData: FormData) {
 
     // Update each category's display_order
     for (const { id, order } of orders) {
-      const { error } = await (supabase
-        .from('categories') as any)
+      const { error } = await supabase
+        .from('categories')
         .update({ display_order: order })
         .eq('id', id);
 

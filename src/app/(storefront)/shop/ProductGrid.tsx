@@ -3,6 +3,7 @@ import { ProductCard } from '@/components/ui/ProductCard';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { ProductWithVariants } from '@/types';
 
 interface ProductGridProps {
   searchParams: {
@@ -40,9 +41,9 @@ export async function ProductGrid({ searchParams }: ProductGridProps) {
       .from('categories')
       .select('id')
       .eq('slug', searchParams.category)
-      .single();
+      .single<{ id: string }>();
     
-    if (cat) {
+    if (cat?.id) {
       query = query.eq('category_id', cat.id);
     }
   }
@@ -84,15 +85,16 @@ export async function ProductGrid({ searchParams }: ProductGridProps) {
   // Pagination
   query = query.range(offset, offset + ITEMS_PER_PAGE - 1);
 
-  const { data: products, count } = await query;
+  const { data, count } = await query.returns<ProductWithVariants[]>();
+  const products = data || [];
 
   // Filter by size/color on client side (variants are a nested array)
-  let filteredProducts = products || [];
+  let filteredProducts = products;
 
   if (searchParams.size || searchParams.color) {
     filteredProducts = filteredProducts.filter((product) => {
-      const variants = (product as any).variants || [];
-      return variants.some((v: any) => {
+      const variants = product.variants || [];
+      return variants.some((v) => {
         const sizeMatch = !searchParams.size || v.size === searchParams.size;
         const colorMatch = !searchParams.color || 
           v.color?.toLowerCase() === searchParams.color.toLowerCase();

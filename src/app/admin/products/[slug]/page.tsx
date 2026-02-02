@@ -4,6 +4,7 @@ import { VariantManager } from './VariantManager';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import type { ProductWithVariants, Category } from '@/types';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -12,59 +13,32 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-interface ProductWithVariants {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  short_description: string | null;
-  price: number;
-  compare_at_price: number | null;
-  cost_price: number | null;
-  category_id: string | null;
-  thumbnail_url: string | null;
-  images: string[];
-  is_active: boolean;
-  is_featured: boolean;
-  is_new: boolean;
-  is_bestseller: boolean;
-  tags: string[];
-  published_at: string | null;
-  created_at: string;
-  updated_at: string;
-  sku: string | null;
-  barcode: string | null;
-  weight: number | null;
-  dimensions: string | null;
-  meta_title: string | null;
-  meta_description: string | null;
-  og_image: string | null;
-  variants: any[];
-}
-
 async function getProduct(slug: string): Promise<ProductWithVariants | null> {
   const supabase = await createClient();
   
-  const { data: product } = await (supabase
+  const { data: product } = await supabase
     .from('products')
     .select(`
       *,
+      category:categories(id, name, slug),
       variants:product_variants(*)
     `)
     .eq('slug', slug)
-    .single() as any) as { data: ProductWithVariants | null };
+    .single()
+    .returns<ProductWithVariants>();
 
   return product;
 }
 
-async function getCategories() {
+async function getCategories(): Promise<Category[]> {
   const supabase = await createClient();
   
   const { data: categories } = await supabase
     .from('categories')
     .select('*')
     .eq('is_active', true)
-    .order('display_order', { ascending: true });
+    .order('display_order', { ascending: true })
+    .returns<Category[]>();
 
   return categories || [];
 }

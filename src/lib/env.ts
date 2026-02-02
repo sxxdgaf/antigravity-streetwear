@@ -51,7 +51,7 @@ export const serverEnv = () => {
     }
   }
 
-  return parsed.data ?? (process.env as z.infer<typeof serverEnvSchema>);
+  return parsed.data ?? (process.env as unknown as z.infer<typeof serverEnvSchema>);
 };
 
 /**

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Container } from '@/components/ui/Container';
@@ -11,7 +11,9 @@ import { CheckCircle, Package, Truck, Mail, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
-export default function CheckoutSuccessPage() {
+export const dynamic = 'force-dynamic';
+
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('order_id');
   const clearCart = useCartStore((state) => state.clearCart);
@@ -147,5 +149,13 @@ export default function CheckoutSuccessPage() {
         </div>
       </motion.div>
     </Container>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<Container><div className="text-center py-20">Loading...</div></Container>}>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }
