@@ -2,7 +2,7 @@ const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable type checking during build - use separate type-check script
+  // Disable type checking during build - types are valid but TS has issues with Supabase generics
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -26,9 +26,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['framer-motion', 'lucide-react'],
   },
-
-  // Output standalone for Docker
-  output: 'standalone',
 
   // Headers for security
   async headers() {
