@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/ui/Container';
 import { ProductCard } from '@/components/ui/ProductCard';
+import SortSelect from '@/components/SortSelect';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import type { Category, Product } from '@/types/database';
@@ -131,24 +132,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           </p>
           <div className="flex items-center gap-4">
             <label className="text-sm text-brand-grey-500">Sort by:</label>
-            <form>
-              <select
-                name="sort"
-                defaultValue={sort || 'newest'}
-                onChange={(e) => {
-                  const url = new URL(window.location.href);
-                  url.searchParams.set('sort', e.target.value);
-                  url.searchParams.delete('page');
-                  window.location.href = url.toString();
-                }}
-                className="px-3 py-2 border border-brand-grey-200 rounded-lg text-sm bg-white"
-              >
-                <option value="newest">Newest</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="name-asc">Name: A to Z</option>
-              </select>
-            </form>
+            <SortSelect slug={slug} current={sort} />
           </div>
         </div>
 
