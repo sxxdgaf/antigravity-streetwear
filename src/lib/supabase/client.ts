@@ -16,7 +16,17 @@ class MockClient {
       delete: () => ({ then: (resolve: any) => resolve({ data: [], error: null }) }),
     };
   }
-  auth = { signIn: async () => ({ data: null, error: null }), signOut: async () => ({ error: null }) };
+  auth = {
+    signIn: async () => ({ data: null, error: null }),
+    signOut: async () => ({ error: null }),
+    getUser: async () => ({ data: { user: null }, error: null }),
+    getSession: async () => ({ data: { session: null }, error: null }),
+    onAuthStateChange: (cb: (event: string, session: any) => void) => {
+      // no-op subscription for mock
+      const sub = { unsubscribe: () => {} };
+      return { data: { subscription: sub }, error: null };
+    },
+  };
 }
 
 export const supabaseClient = HAS_ENV
@@ -24,31 +34,4 @@ export const supabaseClient = HAS_ENV
   : (new MockClient() as any);
 
 export default supabaseClient;
-/**
- * Supabase Client Configuration
- * Browser client for client-side operations
- */
 
-import { createBrowserClient } from '@supabase/ssr';
-import type { Database } from '@/types/database';
-
-/**
- * Create a Supabase client for browser/client-side usage
- * This client uses the anon key and respects RLS policies
- */
-export function createClient() {
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
-
-// Singleton instance for client-side usage
-let browserClient: ReturnType<typeof createClient> | null = null;
-
-export function getClient() {
-  if (!browserClient) {
-    browserClient = createClient();
-  }
-  return browserClient;
-}
